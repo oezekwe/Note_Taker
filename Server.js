@@ -1,5 +1,6 @@
 const fs= require('fs');
-const {v4 : uuidv4} = require('uuid')
+const db= require('./handleNote');
+const {v4 : uuidv4} = require('uuid');
 const path= require('path');
 const express= require('express');
 const app= express();
@@ -17,21 +18,13 @@ app.get('/notes', (req, res)=> {
 });
 
 app.get('/api/notes', (req,res)=> {
-    res.send(notes);
+    db.getNotes()
+    .then(data=>{res.json(data)});
 });
 
 app.post('/api/notes', (req,res)=> {
-    req.body.id= uuidv4();
-    const note= {title: req.body.title, text: req.body.text, id: req.body.id};
-    fs.readFile('./db/db.json', (err, Dtext)=>{
-        if(err) throw err;
-        let collectionNotes= JSON.parse(Dtext);
-        collectionNotes.push(note);
-        fs.writeFile('./db/db.json', JSON.stringify(collectionNotes,null,2), err=>{
-            if(err) throw err;
-            res.send(notes);
-        });
-    });
+    db.addNote(req.body)
+    .then((data)=>{res.json(data)})
 });
 
 
